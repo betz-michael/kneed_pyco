@@ -6,12 +6,17 @@ from kneed.data_generator import DataGenerator as dg
 from kneed.knee_locator import KneeLocator
 from kneed.shape_detector import find_shape
 
-
-@pytest.mark.parametrize("interp_method", ["interp1d", "polynomial"])
+@pytest.mark.parametrize("interp_method", ["interp1d", "polynomial", "make_splrep"])
 def test_figure2(interp_method):
     """From the kneedle manuscript"""
     x, y = dg.figure2()
-    kl = KneeLocator(x, y, S=1.0, curve="concave", interp_method=interp_method)
+    kl = KneeLocator(
+        x,
+        y,
+        S=1.0,
+        curve="concave",
+        interp_method=interp_method,
+    )
     assert math.isclose(kl.knee, 0.22, rel_tol=0.05)
     assert math.isclose(kl.elbow, 0.22, rel_tol=0.05)
     assert math.isclose(kl.norm_elbow, kl.knee, rel_tol=0.05)
@@ -32,53 +37,74 @@ def test_NoisyGaussian():
     assert math.isclose(kl.knee, 63.0, rel_tol=1e-02)
 
 
-@pytest.mark.parametrize("interp_method", ["interp1d", "polynomial"])
+@pytest.mark.parametrize("interp_method", ["interp1d", "polynomial", "make_splrep"])
 def test_concave_increasing(interp_method):
     """test a concave increasing function"""
     x, y = dg().concave_increasing()
-    kn = KneeLocator(x, y, curve="concave", interp_method=interp_method)
+    kn = KneeLocator(
+        x,
+        y,
+        curve="concave",
+        interp_method=interp_method,
+    )
     assert kn.knee == 2
 
 
-@pytest.mark.parametrize("interp_method", ["interp1d", "polynomial"])
+@pytest.mark.parametrize("interp_method", ["interp1d", "polynomial", "make_splrep"])
 def test_concave_decreasing(interp_method):
     """test a concave decreasing function"""
     x, y = dg.concave_decreasing()
     kn = KneeLocator(
-        x, y, curve="concave", direction="decreasing", interp_method=interp_method
+        x,
+        y,
+        curve="concave",
+        direction="decreasing",
+        interp_method=interp_method,
     )
     assert kn.knee == 7
 
 
-@pytest.mark.parametrize("interp_method", ["interp1d", "polynomial"])
+@pytest.mark.parametrize("interp_method", ["interp1d", "polynomial", "make_splrep"])
 def test_convex_increasing(interp_method):
     """test a convex increasing function"""
     x, y = dg.convex_increasing()
-    kl = KneeLocator(x, y, curve="convex", interp_method=interp_method)
+    kl = KneeLocator(
+        x,
+        y,
+        curve="convex",
+        interp_method=interp_method,
+    )
     assert kl.knee == 7
 
 
-@pytest.mark.parametrize("interp_method", ["interp1d", "polynomial"])
+@pytest.mark.parametrize("interp_method", ["interp1d", "polynomial", "make_splrep"])
 def test_convex_decreasing(interp_method):
     """test a convex decreasing function"""
     x, y = dg.convex_decreasing()
     kl = KneeLocator(
-        x, y, curve="convex", direction="decreasing", interp_method=interp_method
+        x,
+        y,
+        curve="convex",
+        direction="decreasing",
+        interp_method=interp_method,
     )
     assert kl.knee == 2
 
 
-@pytest.mark.parametrize("interp_method", ["interp1d", "polynomial"])
+@pytest.mark.parametrize("interp_method", ["interp1d", "polynomial", "make_splrep"])
 def test_concave_increasing_truncated(interp_method):
     """test a truncated concave increasing function"""
     x, y = dg.concave_increasing()
     kl = KneeLocator(
-        x[:-3] / 10, y[:-3] / 10, curve="concave", interp_method=interp_method
+        x[:-3] / 10,
+        y[:-3] / 10,
+        curve="concave",
+        interp_method=interp_method,
     )
     assert kl.knee == 0.2
 
 
-@pytest.mark.parametrize("interp_method", ["interp1d", "polynomial"])
+@pytest.mark.parametrize("interp_method", ["interp1d", "polynomial", "make_splrep"])
 def test_concave_decreasing_truncated(interp_method):
     """test a truncated concave decreasing function"""
     x, y = dg.concave_decreasing()
@@ -92,17 +118,20 @@ def test_concave_decreasing_truncated(interp_method):
     assert kl.knee == 0.4
 
 
-@pytest.mark.parametrize("interp_method", ["interp1d", "polynomial"])
+@pytest.mark.parametrize("interp_method", ["interp1d", "polynomial", "make_splrep"])
 def test_convex_increasing_truncated(interp_method):
     """test a truncated convex increasing function"""
     x, y = dg.convex_increasing()
     kl = KneeLocator(
-        x[:-3] / 10, y[:-3] / 10, curve="convex", interp_method=interp_method
+        x[:-3] / 10,
+        y[:-3] / 10,
+        curve="convex",
+        interp_method=interp_method,
     )
     assert kl.knee == 0.4
 
 
-@pytest.mark.parametrize("interp_method", ["interp1d", "polynomial"])
+@pytest.mark.parametrize("interp_method", ["interp1d", "polynomial", "make_splrep"])
 def test_convex_decreasing_truncated(interp_method):
     """test a truncated convex decreasing function"""
     x, y = dg.convex_decreasing()
@@ -117,13 +146,18 @@ def test_convex_decreasing_truncated(interp_method):
 
 
 @pytest.mark.parametrize(
-    "interp_method, expected", [("interp1d", 26), ("polynomial", 28)]
+    "interp_method, expected",
+    [("interp1d", 26), ("polynomial", 28), ("make_splrep", 26)],
 )
 def test_convex_decreasing_bumpy(interp_method, expected):
     """test a bumpy convex decreasing function"""
     x, y = dg.bumpy()
     kl = KneeLocator(
-        x, y, curve="convex", direction="decreasing", interp_method=interp_method
+        x,
+        y,
+        curve="convex",
+        direction="decreasing",
+        interp_method=interp_method,
     )
     assert kl.knee == expected
 
@@ -176,11 +210,16 @@ def test_sine():
     assert np.isclose(expected_knees, detected_knees).all()
 
 
-def test_list_input():
+@pytest.mark.parametrize("interp_method", ["interp1d", "polynomial", "make_splrep"])
+def test_list_input(interp_method):
     """Indirectly test that flip works on lists as input"""
     x, y = dg.figure2()
     kl = KneeLocator(
-        x.tolist(), y.tolist(), S=1.0, curve="concave", interp_method="polynomial"
+        x.tolist(),
+        y.tolist(),
+        S=1.0,
+        curve="concave",
+        interp_method=interp_method,
     )
     assert math.isclose(kl.knee, 0.22, rel_tol=0.05)
 
@@ -287,6 +326,20 @@ def test_interp_method():
     x, y = dg.figure2()
     with pytest.raises(ValueError):
         kl = KneeLocator(x, y, interp_method="not_a_method")
+
+
+def test_make_splrep_requires_smoothing_factor():
+    """make_splrep requires a smoothing_factor value."""
+    x, y = dg.figure2()
+    with pytest.raises(ValueError, match="smoothing_factor"):
+        KneeLocator(
+            x,
+            y,
+            S=1.0,
+            curve="concave",
+            interp_method="make_splrep",
+            smoothing_factor=None,
+        )
 
 
 def test_x_equals_y():
@@ -560,3 +613,35 @@ def test_find_shape():
     direction, curve = find_shape(x, y)
     assert direction == "increasing"
     assert curve == "convex"
+
+# this is for running the test with `run and debug` in VSCode
+# just add breakpoints, hit run and have fun. :)
+if __name__ == "__main__":
+
+    import sys
+    import matplotlib
+    matplotlib.use("TkAgg")
+
+    # Run all tests
+    sys.exit(
+        pytest.main(
+            ["--log-cli-level=INFO", "--import-mode=importlib", "-vv", __file__]
+        )
+    )
+
+    # Run only the specified test
+    # sys.exit(
+    #     pytest.main(
+    #         [
+    #             "--log-cli-level=INFO",
+    #             "--import-mode",
+    #             "importlib",
+    #             "-vv",
+    #             __file__,
+    #             "-k",
+    #             "test_x_equals_y",
+    #             "-o",
+    #             "addopts=",
+    #         ]
+    #     )
+    # )

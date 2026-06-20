@@ -37,7 +37,7 @@ class KneeLocator(object):
     direction : str, default "increasing"
         One of ``{"increasing", "decreasing"}``.
     interp_method : str, default "interp1d"
-        One of ``{"interp1d", "polynomial"}``.
+        One of ``{"interp1d", "polynomial", "make_splrep"}``.
     online : bool, default False
         If True, kneed will correct old knee points as it traverses the
         curve. If False, it returns the first knee found.
@@ -45,6 +45,12 @@ class KneeLocator(object):
         The degree of the fitting polynomial. Only used when
         ``interp_method="polynomial"``. Passed to ``numpy.polyfit`` as
         the ``deg`` parameter.
+    smoothing_factor : float, default 1.0
+        The smoothing factor for the B-spline.
+        Higher values correspond to more smoothing.
+        Only used when ``interp_method="make_splrep"``.
+        Passed to ``scipy.interpolate.make_splrep``
+        as the ``s`` parameter, multiplied by the number of data points.
 
     Attributes
     ----------
@@ -60,11 +66,16 @@ class KneeLocator(object):
     direction : str
         One of ``{"increasing", "decreasing"}``.
     interp_method : str
-        One of ``{"interp1d", "polynomial"}``.
+        One of ``{"interp1d", "polynomial", "make_splrep"}``.
     online : bool
         If True, corrects old knee points. If False, returns first knee.
     polynomial_degree : int
         The degree of the fitting polynomial.
+    smoothing_factor : float
+        The smoothing factor for the B-spline. Only used when
+        ``interp_method="make_splrep"``. Passed to ``scipy.interpolate.make_splrep``
+        as the ``s`` parameter, multiplied by the number of data points.
+        Higher values correspond to more smoothing.
     N : int
         The number of ``x`` values in the input data.
     Ds_y : numpy.ndarray
@@ -140,6 +151,7 @@ class KneeLocator(object):
         interp_method: str = "interp1d",
         online: bool = False,
         polynomial_degree: int = 7,
+        smoothing_factor: Optional[float] = 0.0,
     ):
         # Step 0: Raw Input
         self.x = np.array(x)
@@ -154,7 +166,7 @@ class KneeLocator(object):
         self.all_norm_knees_y = []
         self.online = online
         self.polynomial_degree = polynomial_degree
-
+        self.smoothing_factor = smoothing_factor
         # I'm implementing Look Before You Leap (LBYL) validation for direction
         # and curve arguments. This is not preferred in Python. The motivation
         # is that the logic inside the conditional once y_difference[j] is less
@@ -175,6 +187,11 @@ class KneeLocator(object):
         elif interp_method == "polynomial":
             p = np.poly1d(np.polyfit(x, y, self.polynomial_degree))
             self.Ds_y = p(x)
+        elif interp_method == "make_splrep":
+            if self.smoothing_factor is None:
+                raise ValueError("smoothing_factor must be provided when using make_splrep")
+            b_spline = interpolate.make_splrep(self.x, self.y, s=self.smoothing_factor)
+            self.Ds_y = b_spline(self.x)
         else:
             raise ValueError(
                 "{} is an invalid interp_method parameter, use either 'interp1d' or 'polynomial'".format(
