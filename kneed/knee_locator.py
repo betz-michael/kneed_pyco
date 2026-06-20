@@ -190,7 +190,7 @@ class KneeLocator(object):
         elif interp_method == "make_splrep":
             if self.smoothing_factor is None:
                 raise ValueError("smoothing_factor must be provided when using make_splrep")
-            b_spline = interpolate.make_splrep(self.x, self.y, s=self.smoothing_factor)
+            b_spline = interpolate.make_splrep(self.x, self.y, s=self.smoothing_factor*len(self.x))
             self.Ds_y = b_spline(self.x)
         else:
             raise ValueError(
