@@ -162,16 +162,25 @@ def test_convex_decreasing_bumpy(interp_method, expected):
     assert kl.knee == expected
 
 
+@pytest.mark.parametrize("interp_method", ["interp1d", "make_splrep"])
 @pytest.mark.parametrize("online, expected", [(True, 482), (False, 22)])
-def test_gamma_online_offline(online, expected):
-    """Tests online and offline knee detection.
-    Notable that a large number of samples are highly sensitive to S parameter
+def test_gamma_online_offline(online, expected, interp_method):
+    """
+    Tests online and offline knee detection for the default and spline methods.
+    Notable that a large number of samples are highly sensitive to S parameter.
     """
     np.random.seed(23)
     n = 1000
     x = range(1, n + 1)
     y = sorted(np.random.gamma(0.5, 1.0, n), reverse=True)
-    kl = KneeLocator(x, y, curve="convex", direction="decreasing", online=online)
+    kl = KneeLocator(
+        x,
+        y,
+        curve="convex",
+        direction="decreasing",
+        online=online,
+        interp_method=interp_method,
+    )
     assert kl.knee == expected
 
 
@@ -190,7 +199,8 @@ def test_sensitivity():
         assert kl.knee, expected_knee
 
 
-def test_sine():
+@pytest.mark.parametrize("interp_method", ["interp1d", "make_splrep"])
+def test_sine(interp_method):
     x = np.arange(0, 10, 0.1)
     y_sin = np.sin(x)
 
@@ -204,7 +214,13 @@ def test_sine():
     detected_knees = []
     for direction, curve in sine_combos:
         kl_sine = KneeLocator(
-            x, y_sin, direction=direction, curve=curve, S=1, online=True
+            x,
+            y_sin,
+            direction=direction,
+            curve=curve,
+            S=1,
+            online=True,
+            interp_method=interp_method,
         )
         detected_knees.append(kl_sine.knee)
     assert np.isclose(expected_knees, detected_knees).all()
@@ -224,8 +240,9 @@ def test_list_input(interp_method):
     assert math.isclose(kl.knee, 0.22, rel_tol=0.05)
 
 
-def test_flat_maxima():
-    """The global maxima has a sequentially equal value in the difference curve"""
+@pytest.mark.parametrize("interp_method", ["interp1d", "make_splrep"])
+def test_flat_maxima(interp_method):
+    """The global maxima has a sequentially equal value in the difference curve."""
     x = [
         0,
         1.0,
@@ -267,11 +284,25 @@ def test_flat_maxima():
         0.004392386530014641,
     ]
     # When S=0.0 the first local maximum is found.
-    kl = KneeLocator(x, y, curve="convex", direction="decreasing", S=0.0)
+    kl = KneeLocator(
+        x,
+        y,
+        curve="convex",
+        direction="decreasing",
+        S=0.0,
+        interp_method=interp_method,
+    )
     assert math.isclose(kl.knee, 1.0, rel_tol=0.05)
 
     # When S=1.0 the global maximum is found.
-    kl = KneeLocator(x, y, curve="convex", direction="decreasing", S=1.0)
+    kl = KneeLocator(
+        x,
+        y,
+        curve="convex",
+        direction="decreasing",
+        S=1.0,
+        interp_method=interp_method,
+    )
     assert math.isclose(kl.knee, 8.0, rel_tol=0.05)
 
 
@@ -371,7 +402,8 @@ def test_plot_knee():
     assert num_figures_before < num_figures_after
 
 
-def test_logistic():
+@pytest.mark.parametrize("interp_method", ["interp1d", "make_splrep"])
+def test_logistic(interp_method):
     y = np.array(
         [
             2.00855493e-45,
@@ -582,6 +614,7 @@ def test_logistic():
         curve="convex",
         direction="increasing",
         online=True,
+        interp_method=interp_method,
     )
     assert kl.knee == 73
 
