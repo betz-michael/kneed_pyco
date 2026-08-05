@@ -21,31 +21,3 @@ def test_plotting_methods_raise_when_matplotlib_is_missing(monkeypatch, method_n
 
     with pytest.raises(ModuleNotFoundError):
         getattr(kl, method_name)()
-
-
-# this is for running the test with `run and debug` in VSCode
-# just add breakpoints, hit run and have fun. :)
-if __name__ == "__main__":
-
-    sys.exit(
-        pytest.main(
-            ["--log-cli-level=INFO", "--import-mode=importlib", "-vv", __file__]
-        )
-    )
-
-    # Run only the specified test
-    # sys.exit(
-    #     pytest.main(
-    #         [
-    #             "--log-cli-level=INFO",
-    #             "--import-mode",
-    #             "importlib",
-    #             "-vv",
-    #             __file__,
-    #             "-k",
-    #             "test_logistic",
-    #             "-o",
-    #             "addopts=",
-    #         ]
-    #     )
-    # )

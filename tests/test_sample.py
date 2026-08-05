@@ -1095,36 +1095,3 @@ def test_pmsm_torque():
     assert knee_speed_make_splrep == pytest.approx(434.0, rel=0.015)
     assert source_knee_speed_interp1d == pytest.approx(434.0, rel=0.015)
     assert source_knee_speed_make_splrep == pytest.approx(434.0, rel=0.015)
-
-# this is for running the test with `run and debug` in VSCode
-# just add breakpoints, hit run and have fun. :)
-# (you need to have the correct config in launch.json, though)
-if __name__ == "__main__":
-
-    import sys
-    import matplotlib
-    matplotlib.use("TkAgg")
-
-    # Run all tests
-    # sys.exit(
-    #     pytest.main(
-    #         ["--log-cli-level=INFO", "--import-mode=importlib", "-vv", __file__]
-    #     )
-    # )
-
-    # Run only the specified test
-    sys.exit(
-        pytest.main(
-            [
-                "--log-cli-level=INFO",
-                "--import-mode",
-                "importlib",
-                "-vv",
-                __file__,
-                "-k",
-                "test_pmsm_torque",
-                "-o",
-                "addopts=",
-            ]
-        )
-    )
